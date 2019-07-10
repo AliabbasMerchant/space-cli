@@ -12,7 +12,7 @@
 *.out
 
 test_folder
-deployer.yaml
+./deployer.yaml
 
 #IDEs
 .idea

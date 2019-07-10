@@ -1,0 +1,17 @@
+name: NameOfApp
+project: Project
+workingDir: test_folder
+ignore: test_folder\.ignore
+runtime:
+  name: Python3
+  install: pip install requirements.txt
+  run: python main.py
+constraints:
+  replicas: 1
+  cpu: 1
+  memory: 250m
+ports: []
+env:
+  exampleEnvVariable: exampleValue
+clusters:
+  local: http://192.168.43.226:8080
