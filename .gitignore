@@ -12,7 +12,8 @@
 *.out
 
 test_folder
-./deployer.yaml
+test_folder2
+deployer.yaml
 
 #IDEs
 .idea

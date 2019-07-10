@@ -7,7 +7,7 @@ import (
 )
 
 // AddCluster adds a cluster to the config
-func (conf *Config) AddCluster(name, url string) error {
+func (conf *Deploy) AddCluster(name, url string) error {
 	_, ok := conf.Clusters[name]
 	if !ok {
 		conf.Clusters[name] = url
@@ -17,7 +17,7 @@ func (conf *Config) AddCluster(name, url string) error {
 }
 
 // RemoveCluster removes a cluster from the config
-func (conf *Config) RemoveCluster(name string) error {
+func (conf *Deploy) RemoveCluster(name string) error {
 	_, ok := conf.Clusters[name]
 	if !ok {
 		return errors.New(name + " does not exist")
@@ -27,7 +27,7 @@ func (conf *Config) RemoveCluster(name string) error {
 }
 
 // SetClusterURL sets a cluster url
-func (conf *Config) SetClusterURL(name, url string) error {
+func (conf *Deploy) SetClusterURL(name, url string) error {
 	_, ok := conf.Clusters[name]
 	if !ok {
 		return errors.New(name + " does not exist")

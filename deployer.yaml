@@ -1,17 +1,18 @@
-name: NameOfApp
-project: Project
-workingDir: test_folder
-ignore: test_folder\.ignore
+name: name
+project: project
+workingDir: test_folder2
+ignore: test_folder2\.ignore2
 runtime:
-  name: Python3
-  install: pip install requirements.txt
-  run: python main.py
+  name: NodeJS
+  install: npm install
+  run: npm start
 constraints:
-  replicas: 1
-  cpu: 1
-  memory: 250m
-ports: []
+  replicas: 2
+  cpu: 0.1
+  memory: 500
+ports:
+  - port: 6379
 env:
   exampleEnvVariable: exampleValue
-clusters:
-  local: http://192.168.43.226:8080
+clusters: 
+  name: http://192.168.43.226:8080

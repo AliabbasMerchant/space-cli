@@ -8,7 +8,7 @@ import (
 )
 
 // LoadConfigFromFile loads the config from the provided file path
-func LoadConfigFromFile(path string) (*Config, error) {
+func LoadConfigFromFile(path string) (*Deploy, error) {
 	// Load the file in memory
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -18,9 +18,9 @@ func LoadConfigFromFile(path string) (*Config, error) {
 }
 
 // LoadConfigFromYAML loads the config from the provided yaml bytes
-func LoadConfigFromYAML(text []byte) (*Config, error) {
+func LoadConfigFromYAML(text []byte) (*Deploy, error) {
 	// Marshal the configuration
-	conf := new(Config)
+	conf := new(Deploy)
 	err := yaml.Unmarshal(text, conf)
 	if err != nil {
 		return nil, err
@@ -29,9 +29,9 @@ func LoadConfigFromYAML(text []byte) (*Config, error) {
 }
 
 // LoadConfigFromJSON loads the config from the provided yaml bytes
-func LoadConfigFromJSON(text []byte) (*Config, error) {
+func LoadConfigFromJSON(text []byte) (*Deploy, error) {
 	// Marshal the configuration
-	conf := new(Config)
+	conf := new(Deploy)
 	err := json.Unmarshal(text, conf)
 	if err != nil {
 		return nil, err

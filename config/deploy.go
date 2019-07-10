@@ -1,14 +1,14 @@
 package config
 
-// Config holds the entire configuration
-type Config struct {
+// Deploy holds the config for the deployment
+type Deploy struct {
 	Name        string            `json:"name" yaml:"name"`
 	Project     string            `json:"project" yaml:"project"`
 	WorkingDir  string            `json:"workingDir" yaml:"workingDir"`
 	Ignore      string            `json:"ignore" yaml:"ignore"`
 	Runtime     *Runtime          `json:"runtime" yaml:"runtime"`
 	Constraints *Constraints      `json:"constraints" yaml:"constraints"`
-	Ports       []string         `json:"ports" yaml:"ports"`
+	Ports       []*Port           `json:"ports,omitempty" yaml:"ports,omitempty"`
 	Env         map[string]string `json:"env" yaml:"env"`
 	Clusters    map[string]string `json:"clusters" yaml:"clusters"`
 }
@@ -23,6 +23,13 @@ type Runtime struct {
 // Constraints holds the constraints information
 type Constraints struct {
 	Replicas int      `json:"replicas" yaml:"replicas"`
-	CPU      float32  `json:"cpu" yaml:"cpu"`
-	Memory   string   `json:"memory" yaml:"memory"`
+	CPU      *float32 `json:"cpu,omitempty" yaml:"cpu,omitempty"`
+	Memory   *int64   `json:"memory,omitempty" yaml:"memory,omitempty"`
+}
+
+// Port holds the container ports information
+type Port struct {
+	Port     int     `json:"port" yaml:"port"`
+	Name     *string `json:"name,omitempty" yaml:"name,omitempty"`
+	Protocol *string `json:"protocol,omitempty" yaml:"protocol,omitempty"`
 }

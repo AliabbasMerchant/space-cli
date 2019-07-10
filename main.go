@@ -15,10 +15,10 @@ import (
   "github.com/spaceuptech/space-cli/config"
 )
 
-var confg *config.Config
+var confg *config.Deploy
 
 func actionInit(c *cli.Context) error {
-  confg = &config.Config{}
+  confg = &config.Deploy{}
   err := survey.AskOne(&survey.Input{Message: "name:"}, &confg.Name, survey.Required)
 	if err != nil {
 		return err
@@ -84,28 +84,33 @@ func actionInit(c *cli.Context) error {
       return err
     }
   }
-  ports := ""
-  err = survey.AskOne(&survey.Multiline{Message: "ports to expose (eg 80:80/tcp)",}, &ports, survey.MinLength(0))
-  if err != nil {
-    return err
-  }
-  if ports != "" {
-    confg.Ports = strings.Split(ports, "\n")
-  }
+  // ports := ""
+  // err = survey.AskOne(&survey.Multiline{Message: "ports to expose (eg 80:80/tcp)",}, &ports, survey.MinLength(0))
+  // if err != nil {
+  //   return err
+  // }
+  // if ports != "" {
+  //   confg.Ports = strings.Split(ports, "\n")
+  // }
   constraints := config.Constraints{}
   confg.Constraints = &constraints
   err = survey.AskOne(&survey.Input{Message: "replicas", Default: "1"}, &constraints.Replicas, survey.Required)
   if err != nil {
     return err
   }
-  err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "1"}, &constraints.CPU, survey.Required)
+  var cpu float32 = 1.0
+  err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "1.0"}, &cpu, survey.Required)
   if err != nil {
     return err
   }
-  err = survey.AskOne(&survey.Input{Message: "memory limit", Default: "250m"}, &constraints.Memory, survey.Required)
+  constraints.CPU = &cpu
+
+  var memory int64 = 500
+  err = survey.AskOne(&survey.Input{Message: "memory limit", Default: "500"}, &memory, survey.Required)
   if err != nil {
     return err
   }
+  constraints.Memory = &memory
   confg.Env = map[string]string{"exampleEnvVariable":"exampleValue"}
   // confg.Clusters = make(map[string]string)
 
@@ -121,11 +126,13 @@ func actionDeploy(c *cli.Context) error {
   if confg.Ignore == "" {
     ignore, err = utils.InitIgnoreFromText("")
     if err != nil {
+      log.Println(err)
       return err
     }
   } else {
     ignore, err = utils.InitIgnore(confg.Ignore)
     if err != nil {
+      log.Println(err)
       return err
     }
   }
@@ -241,6 +248,9 @@ func main() {
   
   var err error
   confg, err = config.LoadConfigFromFile(utils.DefaultConfigFilePath)
+  if err != nil {
+    log.Fatal(err)
+  }
 
 	err = app.Run(os.Args)
 	if err != nil {

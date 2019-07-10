@@ -35,6 +35,9 @@ func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, er
 			log.Println(err)
 		}
 		_, err = io.Copy(zipPart, zipFile)
+		if err!= nil {
+			log.Println(err)
+		}
 		configPart, err := m.CreateFormFile("config", DefaultConfigFilePath)
 		if err != nil {
 			log.Println(err)
