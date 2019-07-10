@@ -10,7 +10,7 @@ import (
 )
 
 // StoreDeployerToFile stores the deployer file to disk
-func StoreConfigToFile(conf *Config, path string) error {
+func StoreConfigToFile(conf *Deploy, path string) error {
 	var data []byte
 	var err error
 
@@ -29,6 +29,6 @@ func StoreConfigToFile(conf *Config, path string) error {
 }
 
 // GetJSON gets the json bytes of the config
-func GetJSON(conf *Config) ([]byte, error) {
+func GetJSON(conf *Deploy) ([]byte, error) {
 	return json.Marshal(conf)
 }
