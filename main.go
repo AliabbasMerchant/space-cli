@@ -50,7 +50,12 @@ func main() {
 			Name:  "deploy",
 			Usage: "deploys the space cloud instance",
 			Action: func(c *cli.Context) error {
-				return utils.Deploy()
+				// Load config from file
+				conf, err := config.LoadConfigFromFile(utils.DefaultConfigFilePath)
+				if err != nil {
+					return err
+				}
+				return utils.Deploy(conf)
 			},
 		},
 		{

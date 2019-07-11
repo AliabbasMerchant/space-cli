@@ -5,17 +5,11 @@ import (
 	"log"
 	"os"
 
-	"gitlab.com/spaceuptech/space-registry/config"
+	"github.com/spaceuptech/space-cli/model"
 )
 
 // Deploy deploys the archive and config to the space cloud clusters
-func Deploy() error {
-	// Load config from file
-	conf, err := config.LoadConfigFromFile(DefaultConfigFilePath)
-	if err != nil {
-		return err
-	}
-
+func Deploy(conf *model.Deploy) error {
 	// Create an ignore object
 	ignore, err := NewIgnore(conf.Ignore)
 	if err != nil {

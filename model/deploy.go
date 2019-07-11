@@ -1,4 +1,4 @@
-package config
+package model
 
 // Deploy holds the config for the deployment
 type Deploy struct {
