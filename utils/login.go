@@ -10,17 +10,13 @@ import (
 	"runtime"
 
 	"gopkg.in/AlecAivazis/survey.v1"
+
+	"github.com/spaceuptech/space-cli/model"
 )
 
-// Credentials stores the space cloud credentials
-type Credentials struct {
-	User string `json:"user,omitempty" yaml:"user,omitempty"`
-	Pass string `json:"pass,omitempty" yaml:"pass,omitempty"`
-}
-
 // GenerateCredentials run the cli survey to generate user credentials
-func GenerateCredentials() (*Credentials, error) {
-	c := new(Credentials)
+func GenerateCredentials() (*model.Credentials, error) {
+	c := new(model.Credentials)
 
 	err := survey.AskOne(&survey.Input{Message: "Enter Username:"}, &c.User, survey.Required)
 	if err != nil {
@@ -40,7 +36,7 @@ func Login(cluster, user, pass string) error {
 		return errors.New("Cluster url needs to be provided")
 	}
 
-	var c *Credentials
+	var c *model.Credentials
 	if user == "" || pass == "" {
 		cTemp, err := GenerateCredentials()
 		if err != nil {
@@ -48,7 +44,7 @@ func Login(cluster, user, pass string) error {
 		}
 		c = cTemp
 	} else {
-		c = &Credentials{user, pass}
+		c = &model.Credentials{user, pass}
 	}
 
 	return loginRequest(cluster, c)
@@ -58,7 +54,7 @@ type loginResponse struct {
 	Token string `json:"token"`
 }
 
-func loginRequest(cluster string, c *Credentials) error {
+func loginRequest(cluster string, c *model.Credentials) error {
 	url := cluster + "/v1/api/config/login"
 
 	data, _ := json.Marshal(c)

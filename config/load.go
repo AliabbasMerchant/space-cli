@@ -7,10 +7,12 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v2"
+
+	"github.com/spaceuptech/space-cli/model"
 )
 
 // LoadConfigFromFile loads the config from the provided file path
-func LoadConfigFromFile(path string) (*Deploy, error) {
+func LoadConfigFromFile(path string) (*model.Deploy, error) {
 	// Load the file in memory
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -26,9 +28,9 @@ func LoadConfigFromFile(path string) (*Deploy, error) {
 }
 
 // LoadConfigFromYAML loads the config from the provided yaml bytes
-func loadConfigFromYAML(text []byte) (*Deploy, error) {
+func loadConfigFromYAML(text []byte) (*model.Deploy, error) {
 	// Marshal the configuration
-	conf := new(Deploy)
+	conf := new(model.Deploy)
 	err := yaml.Unmarshal(text, conf)
 	if err != nil {
 		return nil, err
@@ -37,9 +39,9 @@ func loadConfigFromYAML(text []byte) (*Deploy, error) {
 }
 
 // LoadConfigFromJSON loads the config from the provided yaml bytes
-func loadConfigFromJSON(text []byte) (*Deploy, error) {
+func loadConfigFromJSON(text []byte) (*model.Deploy, error) {
 	// Marshal the configuration
-	conf := new(Deploy)
+	conf := new(model.Deploy)
 	err := json.Unmarshal(text, conf)
 	if err != nil {
 		return nil, err

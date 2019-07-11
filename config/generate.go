@@ -5,12 +5,13 @@ import (
 
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"gitlab.com/spaceuptech/space-registry/utils"
+	"github.com/spaceuptech/space-cli/utils"
+	"github.com/spaceuptech/space-cli/model"
 )
 
 // GenerateConfig runs the cli survey and generates a config file
 func GenerateConfig() error {
-	c := new(Deploy)
+	c := new(model.Deploy)
 
 	// Ask project leve details
 	err := survey.AskOne(&survey.Input{Message: "name:"}, &c.Name, survey.Required)
@@ -34,7 +35,7 @@ func GenerateConfig() error {
 	c.Ignore = strings.TrimSpace(c.Ignore)
 
 	// Ask Runtime details
-	c.Runtime = new(Runtime)
+	c.Runtime = new(model.Runtime)
 	err = survey.AskOne(&survey.Select{
 		Message: "runtime type:",
 		Options: []string{utils.Python3, utils.Java11, utils.Golang, utils.NodeJS},
@@ -80,7 +81,7 @@ func GenerateConfig() error {
 	}
 
 	// Ask contraint details
-	constraints := Constraints{}
+	constraints := model.Constraints{}
 	c.Constraints = &constraints
 	err = survey.AskOne(&survey.Input{Message: "replicas", Default: "1"}, &constraints.Replicas, survey.Required)
 	if err != nil {

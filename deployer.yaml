@@ -1,17 +1,24 @@
-name: name
-project: project
-workingDir: test_folder2
-ignore: test_folder2\.ignore2
+workingDir: test_folder2\node
+clusters: {}
+ignore: test_folder2\node\.ignore2
+name: node-app-name
+# name: python-app
+# name: node-app-name
+# name: node-app-name
+project: project-name
 runtime:
-  name: NodeJS
+  name: spaceuptech/runtime-node:latest
+  # name: spaceuptech/runtime-java:latest
+  # name: spaceuptech/runtime-python:latest
+  # name: spaceuptech/runtime-golang:latest
   install: npm install
   run: npm start
 constraints:
-  replicas: 2
-  cpu: 0.1
-  memory: 500
+  replicas: 1
+  cpu: 0.5
+  memory: 200
 ports:
-  - port: 6379
+  - port: 3000
 env:
   exampleEnvVariable: exampleValue
 clusters: 

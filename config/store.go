@@ -6,10 +6,12 @@ import (
 	"strings"
 
 	"gopkg.in/yaml.v2"
+
+	"github.com/spaceuptech/space-cli/model"
 )
 
 // StoreConfigToFile stores the deployer file to disk
-func StoreConfigToFile(conf *Deploy, path string) error {
+func StoreConfigToFile(conf *model.Deploy, path string) error {
 	var data []byte
 	var err error
 
