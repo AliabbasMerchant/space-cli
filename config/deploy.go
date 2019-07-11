@@ -2,15 +2,18 @@ package config
 
 // Deploy holds the config for the deployment
 type Deploy struct {
+	// CLI specific config
+	WorkingDir string            `json:"workingDir" yaml:"workingDir"`
+	Clusters   map[string]string `json:"clusters" yaml:"clusters"`
+	Ignore     string            `json:"ignore" yaml:"ignore"`
+
+	// Deployment specific config
 	Name        string            `json:"name" yaml:"name"`
 	Project     string            `json:"project" yaml:"project"`
-	WorkingDir  string            `json:"workingDir" yaml:"workingDir"`
-	Ignore      string            `json:"ignore" yaml:"ignore"`
 	Runtime     *Runtime          `json:"runtime" yaml:"runtime"`
 	Constraints *Constraints      `json:"constraints" yaml:"constraints"`
 	Ports       []*Port           `json:"ports,omitempty" yaml:"ports,omitempty"`
 	Env         map[string]string `json:"env" yaml:"env"`
-	Clusters    map[string]string `json:"clusters" yaml:"clusters"`
 }
 
 // Runtime holds the runtime information
@@ -22,7 +25,7 @@ type Runtime struct {
 
 // Constraints holds the constraints information
 type Constraints struct {
-	Replicas int      `json:"replicas" yaml:"replicas"`
+	Replicas int32    `json:"replicas" yaml:"replicas"`
 	CPU      *float32 `json:"cpu,omitempty" yaml:"cpu,omitempty"`
 	Memory   *int64   `json:"memory,omitempty" yaml:"memory,omitempty"`
 }

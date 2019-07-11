@@ -18,3 +18,5 @@ deployer.yaml
 #IDEs
 .idea
 .vscode
+
+space-cli

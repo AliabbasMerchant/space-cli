@@ -1,13 +1,27 @@
 package config
 
 import (
-  "errors"
+	"errors"
 
-  "github.com/spaceuptech/space-cli/utils"
+	"github.com/spaceuptech/space-cli/utils"
 )
 
 // AddCluster adds a cluster to the config
-func (conf *Deploy) AddCluster(name, url string) error {
+func AddCluster(name, url string) error {
+	// Sanity check
+	if len(name) == 0 {
+		return errors.New("Cluster Name Cannot be Empty")
+	}
+	if len(url) == 0 {
+		return errors.New("Cluster URL Cannot be Empty")
+	}
+
+	// Load config from file
+	conf, err := LoadConfigFromFile(utils.DefaultConfigFilePath)
+	if err != nil {
+		return err
+	}
+
 	_, ok := conf.Clusters[name]
 	if !ok {
 		conf.Clusters[name] = url
@@ -17,17 +31,44 @@ func (conf *Deploy) AddCluster(name, url string) error {
 }
 
 // RemoveCluster removes a cluster from the config
-func (conf *Deploy) RemoveCluster(name string) error {
+func RemoveCluster(name string) error {
+
+	// Sanity check
+	if len(name) == 0 {
+		return errors.New("Cluster Name Cannot be Empty")
+	}
+
+	// Load config from file
+	conf, err := LoadConfigFromFile(utils.DefaultConfigFilePath)
+	if err != nil {
+		return err
+	}
+
 	_, ok := conf.Clusters[name]
 	if !ok {
 		return errors.New(name + " does not exist")
 	}
+
 	delete(conf.Clusters, name)
 	return StoreConfigToFile(conf, utils.DefaultConfigFilePath)
 }
 
 // SetClusterURL sets a cluster url
-func (conf *Deploy) SetClusterURL(name, url string) error {
+func SetClusterURL(name, url string) error {
+	// Sanity check
+	if len(name) == 0 {
+		return errors.New("Cluster Name Cannot be Empty")
+	}
+	if len(url) == 0 {
+		return errors.New("Cluster URL Cannot be Empty")
+	}
+
+	// Load config from file
+	conf, err := LoadConfigFromFile(utils.DefaultConfigFilePath)
+	if err != nil {
+		return err
+	}
+
 	_, ok := conf.Clusters[name]
 	if !ok {
 		return errors.New(name + " does not exist")

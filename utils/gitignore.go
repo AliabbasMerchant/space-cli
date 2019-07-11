@@ -1,64 +1,54 @@
 package utils
 
 import (
-	"github.com/denormal/go-gitignore"
-	// "log"
+	"log"
 	"os"
-	// "path/filepath"
-	"io/ioutil"
+	"path/filepath"
+
+	"github.com/denormal/go-gitignore"
 )
+
+// Ignore is the instance used to selectively add files to archive
 type Ignore struct {
 	ignore     gitignore.GitIgnore
 	ignoreFile string
 	delete     bool
 }
-func InitIgnore(ignoreFile string) (*Ignore, error) {
+
+// NewIgnore creates a new Ignore instance
+func NewIgnore(ignoreFile string) (*Ignore, error) {
 	ignore, err := gitignore.NewFromFile(ignoreFile)
 	if err != nil {
 		return nil, err
 	}
 	return &Ignore{ignore, ignoreFile, false}, nil
 }
-func InitIgnoreFromText(ignoreText string) (*Ignore, error) {
-	err := ioutil.WriteFile("SPACEIgnore", []byte(ignoreText), 0644)
-    if err != nil {
-		return nil, err
-	}
-	ignore, err := gitignore.NewFromFile("SPACEIgnore")
-	if err != nil {
-		return nil, err
-	}
-	return &Ignore{ignore, "SPACEIgnore", true}, nil
-}
-func (i *Ignore) ToBeIncluded(path string) bool {
-	// Any other checks
-	if i.ignore.Ignore(path) {
-		return false
-	}
-	// Any other checks
-	return true
-}
-func (i *Ignore) Close() {
-	if(i.delete) {
-		os.Remove(i.ignoreFile)
-	}
-}
-// func main() {
-// 	i, err := InitIgnoreFromText("")
-// 	if err != nil {
-// 		log.Println(err)
-// 		return
-// 	}
-// 	defer i.Close()
 
-// 	var files []string
-// 	err = filepath.Walk("test_folder", func(path string, info os.FileInfo, err error) error {
-// 		files = append(files, path)
-// 		log.Println(path)
-// 		log.Println(i.ToBeIncluded(path))
-// 		return nil
-// 	})
-// 	if err != nil {
-// 		log.Println(err)
-// 	}
-// }
+// GetFileList fetches the file list after applying the ignore rule
+func (i *Ignore) GetFileList(workingDir string) ([]string, error) {
+	// Change the directory to the working directory
+	if err := os.Chdir(workingDir); err != nil {
+		return nil, err
+	}
+
+	// Create a files object
+	files := []string{}
+
+	// Walk through the file tree
+	if err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+		// Add the file to list if it passes the match
+		if !info.IsDir() && i.include(path) {
+			log.Println("Adding file:", path)
+			files = append(files, path)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return files, nil
+}
+
+func (i *Ignore) include(path string) bool {
+	return !i.ignore.Ignore(path)
+}

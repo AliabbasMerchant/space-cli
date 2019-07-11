@@ -1,60 +1,66 @@
 package utils
 
 import (
-    "archive/zip"
-    // "fmt"
-    "io"
-    "os"
+	"archive/zip"
+	"io"
+	"os"
 )
 
+// ZipFiles creates an archive based on list of file paths provided
 func ZipFiles(filename string, files []string) error {
-    newZipFile, err := os.Create(filename)
-    if err != nil {
-        return err
-    }
-    defer newZipFile.Close()
-    zipWriter := zip.NewWriter(newZipFile)
-    defer zipWriter.Close()
+	// Create a zip archive
+	newZipFile, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer newZipFile.Close()
 
-    for _, file := range files {
-        if err = AddFileToZip(zipWriter, file); err != nil {
-            return err
-        }
-    }
-    return nil
+	// Create a zip writer
+	zipWriter := zip.NewWriter(newZipFile)
+	defer zipWriter.Close()
+
+	// Add files to zip
+	for _, file := range files {
+		if err := addFileToZip(zipWriter, file); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func AddFileToZip(zipWriter *zip.Writer, filename string) error {
-    fileToZip, err := os.Open(filename)
-    if err != nil {
-        return err
-    }
-    defer fileToZip.Close()
+func addFileToZip(zipWriter *zip.Writer, filename string) error {
+	// Open the file
+	fileToZip, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer fileToZip.Close()
 
-    info, err := fileToZip.Stat()
-    if err != nil {
-        return err
-    }
+	// Get file stats
+	info, err := fileToZip.Stat()
+	if err != nil {
+		return err
+	}
 
-    header, err := zip.FileInfoHeader(info)
-    if err != nil {
-        return err
-    }
+	// Set the file name in header
+	header, err := zip.FileInfoHeader(info)
+	if err != nil {
+		return err
+	}
+	header.Name = filename
 
-    // Using FileInfoHeader() above only uses the basename of the file. If we want
-    // to preserve the folder structure we can overwrite this with the full path.
-    header.Name = filename
+	// Set compression method
+	header.Method = zip.Deflate
 
-    // Change to deflate to gain better compression
-    // see http://golang.org/pkg/archive/zip/#pkg-constants
-    header.Method = zip.Deflate
+	// Create a writer
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
 
-    writer, err := zipWriter.CreateHeader(header)
-    if err != nil {
-        return err
-    }
-    _, err = io.Copy(writer, fileToZip)
-    return err
+	// Copy the file to archive
+	_, err = io.Copy(writer, fileToZip)
+	return err
 }
 
 // func main() {

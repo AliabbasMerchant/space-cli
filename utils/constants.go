@@ -22,5 +22,3 @@ const DefaultConfigFilePath string = "deployer.yaml"
 
 // ZipName is the name of the temporary zip file created
 const ZipName string = "SPACEzip.zip"
-
-const Temporary string = "/v1/api/deploy"

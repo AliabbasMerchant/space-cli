@@ -1,15 +1,14 @@
 package config
 
 import (
-  "errors"
-  "io/ioutil"
+	"errors"
+	"io/ioutil"
 	"strings"
-	"encoding/json"
 
-  "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
 
-// StoreDeployerToFile stores the deployer file to disk
+// StoreConfigToFile stores the deployer file to disk
 func StoreConfigToFile(conf *Deploy, path string) error {
 	var data []byte
 	var err error
@@ -26,9 +25,4 @@ func StoreConfigToFile(conf *Deploy, path string) error {
 	}
 
 	return ioutil.WriteFile(path, data, 0644)
-}
-
-// GetJSON gets the json bytes of the config
-func GetJSON(conf *Deploy) ([]byte, error) {
-	return json.Marshal(conf)
 }

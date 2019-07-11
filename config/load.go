@@ -1,8 +1,10 @@
 package config
 
 import (
-	"io/ioutil"
 	"encoding/json"
+	"errors"
+	"io/ioutil"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -12,13 +14,19 @@ func LoadConfigFromFile(path string) (*Deploy, error) {
 	// Load the file in memory
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("No config file present")
 	}
-	return LoadConfigFromYAML(data)
+	if strings.HasSuffix(path, ".yaml") {
+		return loadConfigFromYAML(data)
+	} else if strings.HasSuffix(path, ".json") {
+		return loadConfigFromJSON(data)
+	}
+
+	return nil, errors.New("Invalid config file type provided")
 }
 
 // LoadConfigFromYAML loads the config from the provided yaml bytes
-func LoadConfigFromYAML(text []byte) (*Deploy, error) {
+func loadConfigFromYAML(text []byte) (*Deploy, error) {
 	// Marshal the configuration
 	conf := new(Deploy)
 	err := yaml.Unmarshal(text, conf)
@@ -29,7 +37,7 @@ func LoadConfigFromYAML(text []byte) (*Deploy, error) {
 }
 
 // LoadConfigFromJSON loads the config from the provided yaml bytes
-func LoadConfigFromJSON(text []byte) (*Deploy, error) {
+func loadConfigFromJSON(text []byte) (*Deploy, error) {
 	// Marshal the configuration
 	conf := new(Deploy)
 	err := json.Unmarshal(text, conf)

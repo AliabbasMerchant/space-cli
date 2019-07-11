@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"bytes"
+	"encoding/json"
+	"errors"
 	"io"
 	"log"
-	"errors"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -35,7 +35,7 @@ func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, er
 			log.Println(err)
 		}
 		_, err = io.Copy(zipPart, zipFile)
-		if err!= nil {
+		if err != nil {
 			log.Println(err)
 		}
 		configPart, err := m.CreateFormFile("config", DefaultConfigFilePath)
@@ -47,34 +47,47 @@ func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, er
 	}()
 
 	req, err := http.NewRequest("POST", uri, r)
+	if err != nil {
+		return nil, err
+	}
+
+	// Read the token from the file
+	token, err := readToken()
+	if err != nil {
+		return nil, errors.New("You are not logged in to the cluster")
+	}
+
+	// Set the appropriate headers
 	req.Header.Set("Content-Type", m.FormDataContentType())
+	req.Header.Set("Authorization", "Bearer "+token)
 	return req, err
 }
 
+// SendToCluster sends the config & archive to the space cloud cluster
 func SendToCluster(url, zip string, conf []byte) error {
 	request, err := newfileUploadRequest(url, zip, conf)
 	if err != nil {
 		return err
 	}
+
+	// Make a new http client and fire the request
 	client := &http.Client{}
-	resp, err := client.Do(request)
+	res, err := client.Do(request)
 	if err != nil {
 		return err
-	} else {
-		log.Println(resp.StatusCode)
-		// if resp.StatusCode == http.StatusOK {
-		// 	return nil
-		// }
-		body := &bytes.Buffer{}
-		log.Println(body)
-		_, err := body.ReadFrom(resp.Body)
-		if err != nil {
-			return err
-		}
-		if resp.StatusCode == http.StatusOK {
-			return nil
-		}
-		resp.Body.Close()
-		return errors.New(body.String())
 	}
+	defer res.Body.Close()
+
+	// Marshal the response
+	obj := map[string]string{}
+	if err := json.NewDecoder(res.Body).Decode(&obj); err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusOK {
+		return nil
+	}
+
+	return errors.New(obj["error"])
+
 }
