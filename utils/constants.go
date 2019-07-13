@@ -17,6 +17,31 @@ const (
 	NodeJS string = "NodeJS"
 )
 
+const (
+	// Python3Image is the type used for Python3Image
+	Python3Image string = "spaceuptech/runtime-python:latest"
+
+	// Java11Image is the type used for Java11Image
+	Java11Image string = "spaceuptech/runtime-java:latest"
+
+	// GolangImage is the type used for GolangImage
+	GolangImage string = "spaceuptech/runtime-golang:latest"
+
+	// NodeJSImage is the type used for NodeJSImage
+	NodeJSImage string = "spaceuptech/runtime-node:latest"
+
+	// WebAppImage is the type used for WebAppImage
+	WebAppImage string = "spaceuptech/runtime-web-app:latest"
+)
+
+const (
+	// KindService is the kind used for a Service
+	KindService string = "service"
+
+	// KindWebApp is the kind used for a WebApp
+	KindWebApp string = "web-app"
+)
+
 // DefaultConfigFilePath is the default path to load / store the config file
 const DefaultConfigFilePath string = "deployer.yaml"
 

@@ -2,6 +2,7 @@ package config
 
 import (
 	"strings"
+	"fmt"
 
 	"gopkg.in/AlecAivazis/survey.v1"
 
@@ -13,12 +14,19 @@ import (
 func GenerateConfig() error {
 	c := new(model.Deploy)
 
-	// Ask project leve details
-	err := survey.AskOne(&survey.Input{Message: "name:"}, &c.Name, survey.Required)
+	// Ask project level details
+	err := survey.AskOne(&survey.Input{Message: "name of app:"}, &c.Name, survey.Required)
 	if err != nil {
 		return err
 	}
 	err = survey.AskOne(&survey.Input{Message: "project name:"}, &c.Project, survey.Required)
+	if err != nil {
+		return err
+	}
+	err = survey.AskOne(&survey.Select{
+		Message: "kind of app:",
+		Options: []string{utils.KindService, utils.KindWebApp},
+	}, &c.Kind, survey.Required)
 	if err != nil {
 		return err
 	}
@@ -34,74 +42,109 @@ func GenerateConfig() error {
 	}
 	c.Ignore = strings.TrimSpace(c.Ignore)
 
-	// Ask Runtime details
-	c.Runtime = new(model.Runtime)
-	err = survey.AskOne(&survey.Select{
-		Message: "runtime type:",
-		Options: []string{utils.Python3, utils.Java11, utils.Golang, utils.NodeJS},
-	}, &c.Runtime.Name, survey.Required)
-	if err != nil {
-		return err
-	}
+	switch c.Kind {
+	case utils.KindService:
+		// Ask Runtime details
+		c.Runtime = new(model.Runtime)
+		name := ""
+		err = survey.AskOne(&survey.Select{
+			Message: "runtime type:",
+			Options: []string{utils.Python3, utils.Java11, utils.Golang, utils.NodeJS},
+		}, &name, survey.Required)
+		if err != nil {
+			return err
+		}
+		switch name {
+		case utils.Python3:
+			c.Runtime.Name = utils.Python3Image
+		case utils.Java11:
+			c.Runtime.Name = utils.Java11Image
+		case utils.Golang:
+			c.Runtime.Name = utils.GolangImage
+		case utils.NodeJS:
+			c.Runtime.Name = utils.NodeJSImage
+		}
 
-	switch c.Runtime.Name {
-	case utils.Python3:
-		err = survey.AskOne(&survey.Input{Message: "command to install:", Default: "pip install requirements.txt"}, &c.Runtime.Install, survey.Required)
+		switch c.Runtime.Name {
+		case utils.Python3Image:
+			err = survey.AskOne(&survey.Input{Message: "command to install:", Default: "pip install requirements.txt"}, &c.Runtime.Install, survey.Required)
+			if err != nil {
+				return err
+			}
+			err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "python main.py"}, &c.Runtime.Run, survey.Required)
+			if err != nil {
+				return err
+			}
+		case utils.NodeJSImage:
+			err = survey.AskOne(&survey.Input{Message: "command to install:", Default: "npm install"}, &c.Runtime.Install, survey.Required)
+			if err != nil {
+				return err
+			}
+			err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "npm start"}, &c.Runtime.Run, survey.Required)
+			if err != nil {
+				return err
+			}
+		case utils.Java11Image:
+			c.Runtime.Install = ""
+			err = survey.AskOne(&survey.Input{Message: "command to run (please make a jar file):", Default: "java jarfile.jar"}, &c.Runtime.Run, survey.Required)
+			if err != nil {
+				return err
+			}
+		case utils.GolangImage:
+			err = survey.AskOne(&survey.Input{Message: "command to setup:", Default: "go build"}, &c.Runtime.Install, survey.Required)
+			if err != nil {
+				return err
+			}
+			err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "./executable"}, &c.Runtime.Run, survey.Required)
+			if err != nil {
+				return err
+			}
+		}
+		
+		// Ask contraint details
+		constraints := model.Constraints{}
+		c.Constraints = &constraints
+		err = survey.AskOne(&survey.Input{Message: "replicas", Default: "1"}, &constraints.Replicas, survey.Required)
 		if err != nil {
 			return err
 		}
-		err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "python main.py"}, &c.Runtime.Run, survey.Required)
+		var cpu float32 = 0.3
+		err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "0.3"}, &cpu, survey.Required)
 		if err != nil {
 			return err
 		}
-	case utils.NodeJS:
-		err = survey.AskOne(&survey.Input{Message: "command to install:", Default: "npm install"}, &c.Runtime.Install, survey.Required)
+		constraints.CPU = &cpu
+
+		var memory int64 = 200
+		err = survey.AskOne(&survey.Input{Message: "memory limit (in MBs)", Default: "200"}, &memory, survey.Required)
 		if err != nil {
 			return err
 		}
-		err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "npm start"}, &c.Runtime.Run, survey.Required)
-		if err != nil {
-			return err
-		}
-	case utils.Java11:
+		constraints.Memory = &memory
+		// c.Clusters = make(map[string]string)
+
+	case utils.KindWebApp:
+		c.Runtime = new(model.Runtime)
+		c.Runtime.Name = utils.WebAppImage
 		c.Runtime.Install = ""
-		err = survey.AskOne(&survey.Input{Message: "command to run (please make a jar file):", Default: "java jarfile.jar"}, &c.Runtime.Run, survey.Required)
-		if err != nil {
-			return err
-		}
-	case utils.Golang:
-		err = survey.AskOne(&survey.Input{Message: "command to setup:", Default: "go build"}, &c.Runtime.Install, survey.Required)
-		if err != nil {
-			return err
-		}
-		err = survey.AskOne(&survey.Input{Message: "command to run:", Default: "./executable"}, &c.Runtime.Run, survey.Required)
-		if err != nil {
-			return err
-		}
-	}
+		c.Runtime.Run = ""
 
-	// Ask contraint details
-	constraints := model.Constraints{}
-	c.Constraints = &constraints
-	err = survey.AskOne(&survey.Input{Message: "replicas", Default: "1"}, &constraints.Replicas, survey.Required)
-	if err != nil {
-		return err
-	}
-	var cpu float32 = 0.1
-	err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "0.1"}, &cpu, survey.Required)
-	if err != nil {
-		return err
-	}
-	constraints.CPU = &cpu
+		c.Constraints = new(model.Constraints)
+		c.Constraints.Replicas = 1
+		cpu := float32(0.3)
+		memory := int64(200)
+		c.Constraints.CPU = &cpu
+		c.Constraints.Memory = &memory
 
-	var memory int64 = 200
-	err = survey.AskOne(&survey.Input{Message: "memory limit (in MBs)", Default: "200"}, &memory, survey.Required)
-	if err != nil {
-		return err
+		fmt.Println("Enter port expose details")
+		err := addExpose(c)
+		if err != nil {
+			return err
+		}
+		name := "web"
+		var port int32 = 8080
+		c.Ports = append(c.Ports, &model.Port{Name: &name, Port: port})
 	}
-	constraints.Memory = &memory
-	c.Env = map[string]string{"exampleEnvVariable": "exampleValue"}
-	// c.Clusters = make(map[string]string)
 
 	return StoreConfigToFile(c, utils.DefaultConfigFilePath)
 }

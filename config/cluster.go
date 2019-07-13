@@ -10,10 +10,10 @@ import (
 func AddCluster(name, url string) error {
 	// Sanity check
 	if len(name) == 0 {
-		return errors.New("Cluster Name Cannot be Empty")
+		return errors.New("Cluster name cannot be empty")
 	}
 	if len(url) == 0 {
-		return errors.New("Cluster URL Cannot be Empty")
+		return errors.New("Cluster url cannot be empty")
 	}
 
 	// Load config from file
@@ -35,7 +35,7 @@ func RemoveCluster(name string) error {
 
 	// Sanity check
 	if len(name) == 0 {
-		return errors.New("Cluster Name Cannot be Empty")
+		return errors.New("Cluster name cannot be empty")
 	}
 
 	// Load config from file
@@ -57,10 +57,10 @@ func RemoveCluster(name string) error {
 func SetClusterURL(name, url string) error {
 	// Sanity check
 	if len(name) == 0 {
-		return errors.New("Cluster Name Cannot be Empty")
+		return errors.New("Cluster name cannot be empty")
 	}
 	if len(url) == 0 {
-		return errors.New("Cluster URL Cannot be Empty")
+		return errors.New("Cluster url cannot be empty")
 	}
 
 	// Load config from file
