@@ -1,25 +1,15 @@
-workingDir: test_folder2\node
-clusters: {}
-ignore: test_folder2\node\.ignore2
-name: node-app-name
-# name: python-app
-# name: node-app-name
-# name: node-app-name
-project: project-name
+name: MyApp
+project: MyProject
+kind: service
 runtime:
-  name: spaceuptech/runtime-node:latest
-  # name: spaceuptech/runtime-java:latest
-  # name: spaceuptech/runtime-python:latest
-  # name: spaceuptech/runtime-golang:latest
-  install: npm install
-  run: npm start
+  name: spaceuptech/runtime-python:latest
+  install: pip install requirements.txt
+  run: python main.py
+env: {}
 constraints:
   replicas: 1
-  cpu: 0.5
+  cpu: 0.3
   memory: 200
-ports:
-  - port: 3000
-env:
-  exampleEnvVariable: exampleValue
-clusters: 
-  name: http://192.168.43.226:8080
+workingDir: .
+ignore: .gitignore
+clusters: {}

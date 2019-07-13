@@ -18,11 +18,11 @@ import (
 func GenerateCredentials() (*model.Credentials, error) {
 	c := new(model.Credentials)
 
-	err := survey.AskOne(&survey.Input{Message: "Enter Username:"}, &c.User, survey.Required)
+	err := survey.AskOne(&survey.Input{Message: "username:"}, &c.User, survey.Required)
 	if err != nil {
 		return nil, err
 	}
-	err = survey.AskOne(&survey.Password{Message: "Enter Password:"}, &c.Pass, survey.Required)
+	err = survey.AskOne(&survey.Password{Message: "password:"}, &c.Pass, survey.Required)
 	if err != nil {
 		return nil, err
 	}
