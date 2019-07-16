@@ -1,13 +1,13 @@
 package config
 
 import (
-	"strconv"
-	"errors"
+	"fmt"
+	"strings"
 
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/spaceuptech/space-cli/utils"
 	"github.com/spaceuptech/space-cli/model"
+	"github.com/spaceuptech/space-cli/utils"
 )
 
 // AddExpose adds an exposed port and its proxy information
@@ -17,7 +17,7 @@ func AddExpose() error {
 	if err != nil {
 		return err
 	}
-	
+
 	err = addExpose(conf)
 	if err != nil {
 		return err
@@ -29,33 +29,22 @@ func AddExpose() error {
 func addExpose(conf *model.Deploy) error {
 	expose := new(model.Expose)
 	prefix := ""
-	err := survey.AskOne(&survey.Input{Message: "prefix:"}, &prefix, survey.Required)
+	err := survey.AskOne(&survey.Input{Message: "url prefix to match against:", Default: "/"}, &prefix, survey.Required)
 	if err != nil {
 		return err
 	}
-	expose.Prefix = &prefix
+	if !strings.HasPrefix(prefix, "/") {
+		prefix = "/" + prefix
+	}
+	expose.Prefix = prefix
 	host := ""
-	err = survey.AskOne(&survey.Input{Message: "host:"}, &host, survey.Required)
+	err = survey.AskOne(&survey.Input{Message: "hostname to match against:", Default: ""}, &host, survey.Required)
 	if err != nil {
 		return err
 	}
-	expose.Host = &host
-	proxy := ""
-	err = survey.AskOne(&survey.Input{Message: "proxy:"}, &proxy, survey.Required)
-	if err != nil {
-		return err
-	}
-	expose.Proxy = &proxy
-	port := ""
-	err = survey.AskOne(&survey.Input{Message: "port:"}, &port, survey.Required)
-	if err != nil {
-		return err
-	}
-	p, err := strconv.ParseInt(port, 10, 32)
-	if err != nil {
-		return errors.New("port must be an integer value")
-	}
-	expose.Port = int32(p)
+	expose.Host = host
+
+	expose.Proxy = fmt.Sprintf("http://%s:8000%s", conf.Name, prefix)
 	conf.Expose = append(conf.Expose, expose)
 
 	return nil

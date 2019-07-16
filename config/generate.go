@@ -1,13 +1,13 @@
 package config
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 
 	"gopkg.in/AlecAivazis/survey.v1"
 
-	"github.com/spaceuptech/space-cli/utils"
 	"github.com/spaceuptech/space-cli/model"
+	"github.com/spaceuptech/space-cli/utils"
 )
 
 // GenerateConfig runs the cli survey and generates a config file
@@ -100,7 +100,7 @@ func GenerateConfig() error {
 				return err
 			}
 		}
-		
+
 		// Ask contraint details
 		constraints := model.Constraints{}
 		c.Constraints = &constraints
@@ -108,8 +108,8 @@ func GenerateConfig() error {
 		if err != nil {
 			return err
 		}
-		var cpu float32 = 0.3
-		err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "0.3"}, &cpu, survey.Required)
+		var cpu float32 = 0.2
+		err = survey.AskOne(&survey.Input{Message: "cpu limit", Default: "0.2"}, &cpu, survey.Required)
 		if err != nil {
 			return err
 		}
@@ -131,19 +131,21 @@ func GenerateConfig() error {
 
 		c.Constraints = new(model.Constraints)
 		c.Constraints.Replicas = 1
-		cpu := float32(0.3)
+		cpu := float32(0.2)
 		memory := int64(200)
 		c.Constraints.CPU = &cpu
 		c.Constraints.Memory = &memory
 
 		fmt.Println("Enter port expose details")
+		c.Expose = []*model.Expose{}
 		err := addExpose(c)
 		if err != nil {
 			return err
 		}
 		name := "web"
-		var port int32 = 8080
+		var port int32 = 8000
 		c.Ports = append(c.Ports, &model.Port{Name: &name, Port: port})
+		c.Env = map[string]string{"PREFIX": c.Expose[0].Prefix}
 	}
 
 	return StoreConfigToFile(c, utils.DefaultConfigFilePath)
