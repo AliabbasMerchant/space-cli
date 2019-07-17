@@ -45,7 +45,7 @@ func Login(cluster, user, pass string) error {
 		}
 		c = cTemp
 	} else {
-		c = &model.Credentials{user, pass}
+		c = &model.Credentials{User: user, Pass: pass}
 	}
 
 	if err := loginRequest(cluster, c); err != nil {
