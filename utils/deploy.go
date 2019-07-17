@@ -38,7 +38,7 @@ func Deploy(conf *model.Deploy) error {
 	for name, url := range conf.Clusters {
 		err = SendToCluster(url+"/v1/api/deploy", ZipName, json)
 		if err != nil {
-			log.Println(err)
+			log.Println("Deploy Error:", err)
 		} else {
 			log.Println("Successfully deployed to cluster: " + name)
 		}

@@ -38,7 +38,7 @@ func addExpose(conf *model.Deploy) error {
 	}
 	expose.Prefix = prefix
 	host := ""
-	err = survey.AskOne(&survey.Input{Message: "hostname to match against:", Default: ""}, &host, survey.Required)
+	err = survey.AskOne(&survey.Input{Message: "hostname to match against:", Default: ""}, &host, nil)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -47,11 +48,17 @@ func Login(cluster, user, pass string) error {
 		c = &model.Credentials{user, pass}
 	}
 
-	return loginRequest(cluster, c)
+	if err := loginRequest(cluster, c); err != nil {
+		return err
+	}
+
+	fmt.Println("Login success")
+	return nil
 }
 
 type loginResponse struct {
 	Token string `json:"token"`
+	Error string `json:"error"`
 }
 
 func loginRequest(cluster string, c *model.Credentials) error {
@@ -67,6 +74,10 @@ func loginRequest(cluster string, c *model.Credentials) error {
 	obj := new(loginResponse)
 	if err := json.NewDecoder(res.Body).Decode(obj); err != nil {
 		return err
+	}
+
+	if res.StatusCode != 200 {
+		return errors.New(obj.Error)
 	}
 
 	return writeToken(obj.Token)
