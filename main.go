@@ -1,13 +1,15 @@
 package main
 
 import (
-	"log"
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/urfave/cli"
 
 	"github.com/spaceuptech/space-cli/config"
 	"github.com/spaceuptech/space-cli/utils"
+	"github.com/spaceuptech/space-cli/utils/credentials"
 )
 
 func main() {
@@ -21,8 +23,9 @@ func main() {
 			Usage: "logs in the user",
 			Flags: []cli.Flag{
 				cli.StringFlag{
-					Name:  "url",
-					Usage: "the url of the cluster to login into",
+					Name:  "cluster",
+					Usage: "the cluster to login into",
+					Value: "none",
 				},
 				cli.StringFlag{
 					Name:   "user",
@@ -36,7 +39,26 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				return utils.Login(c.String("url"), c.String("user"), c.String("pass"))
+				cluster := c.String("cluster")
+				if cluster == "none" {
+					cluster = c.Args().Get(0)
+				}
+				err := credentials.Login(cluster, c.String("user"), c.String("pass"))
+				if err == nil {
+					fmt.Println("Login Successful")
+				}
+				return err
+			},
+		},
+		{
+			Name:  "logout",
+			Usage: "logs out the user",
+			Action: func(c *cli.Context) error {
+				err := credentials.Logout(c.Args().Get(0))
+				if err == nil {
+					fmt.Println("Logout Successful")
+				}
+				return err
 			},
 		},
 		{
@@ -50,12 +72,30 @@ func main() {
 			Name:  "deploy",
 			Usage: "deploys the space cloud instance",
 			Action: func(c *cli.Context) error {
-				// Load config from file
-				conf, err := config.LoadConfigFromFile(utils.DefaultConfigFilePath)
+				name := c.Args().Get(0)
+
+				// Load deploy config
+				deploy, err := config.LoadConfigFromFile(utils.DefaultConfigFilePath)
 				if err != nil {
 					return err
 				}
-				return utils.Deploy(conf)
+
+				// Load global config from file
+				conf, err := config.LoadGlobalConfigFromFile(utils.GetGlobalConfigFile())
+				if err != nil {
+					return err
+				}
+
+				cluster, p := conf.Clusters[name]
+				if !p {
+					return errors.New("Cluster name needs to be provided")
+				}
+
+				err = utils.Deploy(name, cluster, deploy)
+				if err == nil {
+					fmt.Println("Successfully deployed to cluster: " + name)
+				}
+				return err
 			},
 		},
 		{
@@ -86,6 +126,19 @@ func main() {
 					UsageText: "space-cli cluster set [name - the cluster name] [url - the new cluster url]",
 					Action: func(c *cli.Context) error {
 						return config.SetClusterURL(c.Args().Get(0), c.Args().Get(1))
+					},
+				},
+				{
+					Name:      "get",
+					Usage:     "get the url of an existing cluster",
+					UsageText: "space-cli cluster get [name - the cluster name]",
+					Action: func(c *cli.Context) error {
+						url, err := config.GetClusterURL(c.Args().Get(0))
+						if err != nil {
+							return err
+						}
+						fmt.Println(url)
+						return nil
 					},
 				},
 			},
@@ -172,7 +225,7 @@ func main() {
 				},
 			},
 		},
-		{ Name:  "expose",
+		{Name: "expose",
 			Usage: "allows to add an exposed port and its proxy information",
 			Subcommands: []cli.Command{
 				{
@@ -189,6 +242,6 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 }

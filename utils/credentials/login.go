@@ -1,17 +1,14 @@
-package utils
+package credentials
 
 import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"runtime"
 
 	"gopkg.in/AlecAivazis/survey.v1"
 
+	"github.com/spaceuptech/space-cli/config"
 	"github.com/spaceuptech/space-cli/model"
 )
 
@@ -34,7 +31,12 @@ func GenerateCredentials() (*model.Credentials, error) {
 // Login logs the user in
 func Login(cluster, user, pass string) error {
 	if cluster == "" {
-		return errors.New("Cluster url needs to be provided")
+		return errors.New("Cluster name needs to be provided")
+	}
+
+	url, err := config.GetClusterURL(cluster)
+	if err != nil {
+		return err
 	}
 
 	var c *model.Credentials
@@ -48,12 +50,12 @@ func Login(cluster, user, pass string) error {
 		c = &model.Credentials{User: user, Pass: pass}
 	}
 
-	if err := loginRequest(cluster, c); err != nil {
+	token, err := loginRequest(url, c)
+	if err != nil {
 		return err
 	}
 
-	fmt.Println("Login success")
-	return nil
+	return config.SetClusterToken(cluster, token)
 }
 
 type loginResponse struct {
@@ -61,52 +63,24 @@ type loginResponse struct {
 	Error string `json:"error"`
 }
 
-func loginRequest(cluster string, c *model.Credentials) error {
+func loginRequest(cluster string, c *model.Credentials) (string, error) {
 	url := cluster + "/v1/api/config/login"
 
 	data, _ := json.Marshal(c)
 	res, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer res.Body.Close()
 
 	obj := new(loginResponse)
 	if err := json.NewDecoder(res.Body).Decode(obj); err != nil {
-		return err
-	}
-
-	if res.StatusCode != 200 {
-		return errors.New(obj.Error)
-	}
-
-	return writeToken(obj.Token)
-}
-
-func userHomeDir() string {
-	if runtime.GOOS == "windows" {
-		home := os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH")
-		if home == "" {
-			home = os.Getenv("USERPROFILE")
-		}
-		return home
-	}
-	return os.Getenv("HOME")
-}
-func writeToken(token string) error {
-	homeDir := userHomeDir()
-	dir := homeDir + "/.space-cloud/cli"
-	os.MkdirAll(dir, os.ModePerm)
-	return ioutil.WriteFile(dir+"/token.txt", []byte(token), 0644)
-}
-
-func readToken() (string, error) {
-	homeDir := userHomeDir()
-	file := homeDir + "/.space-cloud/cli/token.txt"
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
 		return "", err
 	}
 
-	return string(data), nil
+	if res.StatusCode != 200 {
+		return "", errors.New(obj.Error)
+	}
+
+	return obj.Token, nil
 }

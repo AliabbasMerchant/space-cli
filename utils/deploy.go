@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 
@@ -9,7 +10,12 @@ import (
 )
 
 // Deploy deploys the archive and config to the space cloud clusters
-func Deploy(conf *model.Deploy) error {
+func Deploy(name string, cluster *model.Cluster, conf *model.Deploy) error {
+	// Check if user is logged in
+	if len(cluster.Token) == 0 {
+		return errors.New("Not logged in the cluster")
+	}
+
 	// Create an ignore object
 	ignore, err := NewIgnore(conf.Ignore)
 	if err != nil {
@@ -27,6 +33,7 @@ func Deploy(conf *model.Deploy) error {
 	if err := ZipFiles(ZipName, files); err != nil {
 		return err
 	}
+	defer os.Remove(ZipName)
 
 	// Marshal the config to json
 	json, err := json.Marshal(conf)
@@ -34,14 +41,9 @@ func Deploy(conf *model.Deploy) error {
 		return err
 	}
 
-	// Deploy to all clusters
-	for name, url := range conf.Clusters {
-		err = SendToCluster(url+"/v1/api/deploy", ZipName, json)
-		if err != nil {
-			log.Println("Deploy Error:", err)
-		} else {
-			log.Println("Successfully deployed to cluster: " + name)
-		}
+	if err := SendToCluster(cluster.Token, cluster.URL+"/v1/api/deploy", ZipName, json); err != nil {
+		return err
 	}
-	return os.Remove(ZipName)
+
+	return nil
 }

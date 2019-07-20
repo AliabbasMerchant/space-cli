@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, error) {
+func newfileUploadRequest(token, uri, zipPath string, config []byte) (*http.Request, error) {
 	r, w := io.Pipe()
 	m := multipart.NewWriter(w)
 
@@ -51,12 +51,6 @@ func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, er
 		return nil, err
 	}
 
-	// Read the token from the file
-	token, err := readToken()
-	if err != nil {
-		return nil, errors.New("You are not logged in to the cluster")
-	}
-
 	// Set the appropriate headers
 	req.Header.Set("Content-Type", m.FormDataContentType())
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -64,8 +58,8 @@ func newfileUploadRequest(uri, zipPath string, config []byte) (*http.Request, er
 }
 
 // SendToCluster sends the config & archive to the space cloud cluster
-func SendToCluster(url, zip string, conf []byte) error {
-	request, err := newfileUploadRequest(url, zip, conf)
+func SendToCluster(token, url, zip string, conf []byte) error {
+	request, err := newfileUploadRequest(token, url, zip, conf)
 	if err != nil {
 		return err
 	}

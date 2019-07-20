@@ -11,6 +11,24 @@ import (
 	"github.com/spaceuptech/space-cli/model"
 )
 
+// LoadGlobalConfigFromFile loads the global config from file
+func LoadGlobalConfigFromFile(path string) (*model.GlobalConfig, error) {
+	c := &model.GlobalConfig{Clusters: model.Clusters{}}
+
+	// Load the file in memory
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		StoreGlobalConfigToFile(c, path)
+		return c, nil
+	}
+
+	if err := json.Unmarshal(data, c); err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
 // LoadConfigFromFile loads the config from the provided file path
 func LoadConfigFromFile(path string) (*model.Deploy, error) {
 	// Load the file in memory

@@ -13,9 +13,8 @@ type Deploy struct {
 	Expose      []*Expose         `json:"expose,omitempty" yaml:"expose,omitempty"`
 
 	// CLI specific config
-	WorkingDir string            `json:"workingDir" yaml:"workingDir"`
-	Ignore     string            `json:"ignore" yaml:"ignore"`
-	Clusters   map[string]string `json:"clusters" yaml:"clusters"`
+	WorkingDir string `json:"workingDir" yaml:"workingDir"`
+	Ignore     string `json:"ignore" yaml:"ignore"`
 }
 
 // Runtime holds the runtime information
