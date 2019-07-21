@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"gopkg.in/yaml.v2"
 
 	"github.com/spaceuptech/space-cli/model"
+	"github.com/spaceuptech/space-cli/utils"
 )
 
 // LoadGlobalConfigFromFile loads the global config from file
@@ -18,6 +20,7 @@ func LoadGlobalConfigFromFile(path string) (*model.GlobalConfig, error) {
 	// Load the file in memory
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
+		os.MkdirAll(utils.GetGlobalConfigDir(), os.ModePerm)
 		StoreGlobalConfigToFile(c, path)
 		return c, nil
 	}

@@ -1,7 +1,7 @@
 package utils
 
 // BuildVersion is the current version of Space Cli
-const BuildVersion = "0.1.0"
+const BuildVersion = "0.1.1"
 
 const (
 	// Python3 is the type used for Python3
